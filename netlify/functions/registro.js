@@ -74,8 +74,8 @@ const ATTR = {
 
 function buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName) {
   const attrs = {
-    FIRSTNAME: firstName,
-    LASTNAME: lastName,
+    NOMBRE: firstName,
+    APELLIDOS: lastName,
     [ATTR.ciudad]: data.ciudad,
     [ATTR.provincia]: data.provincia,
     [ATTR.trabajaEducacion]: data.trabaja_educacion ? 'Sí' : 'No',
