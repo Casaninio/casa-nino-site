@@ -6,6 +6,15 @@
 
 const { getStore } = require('@netlify/blobs');
 
+function getBlobStore(name) {
+  const siteID = process.env.NETLIFY_BLOBS_SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN;
+  if (siteID && token) {
+    return getStore({ name, siteID, token });
+  }
+  return getStore(name);
+}
+
 exports.handler = async function (event) {
   const id = event.queryStringParameters && event.queryStringParameters.id;
 
@@ -13,7 +22,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: 'Falta el parámetro id' };
   }
 
-  const store = getStore('casa-nino-credenciales-imagenes');
+  const store = getBlobStore('casa-nino-credenciales-imagenes');
 
   try {
     const arrayBuffer = await store.get(id, { type: 'arrayBuffer' });
