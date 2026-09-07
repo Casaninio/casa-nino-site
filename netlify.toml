@@ -1,0 +1,19 @@
+[build]
+  functions = "netlify/functions"
+
+# La función que conecta con Perfit puede ser llamada desde cualquier origen
+# (por si el HTML terminara alojado en otro dominio en el futuro).
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# Las imágenes no cambian de nombre entre versiones (son archivos fijos),
+# así que le decimos al navegador que las guarde en cache por un año.
+# Esto es lo que hace que las visitas repetidas casi no consuman bandwidth.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

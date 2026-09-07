@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu credencial — Casa Niño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FFE573;
+    --paper-soft: #FFECC5;
+    --ink: #39250C;
+    --ink-soft: rgba(57,37,12,0.66);
+    --mustard: #C57913;
+    --line: rgba(57,37,12,0.18);
+    --display: 'Fraunces', serif;
+    --body: 'Work Sans', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper-soft); color:var(--ink); font-family:var(--body); line-height:1.5;}
+  a{color:inherit;}
+
+  .top{
+    padding:22px 6vw; display:flex; align-items:center; justify-content:space-between;
+    background:var(--paper);
+  }
+  .top img{height:40px; width:auto; display:block;}
+  .top a.back{font-size:14px; text-decoration:none; color:var(--ink-soft);}
+  .top a.back:hover{color:var(--ink);}
+
+  .wrap{max-width:480px; margin:0 auto; padding:56px 24px 90px; text-align:center;}
+  .wrap h1{
+    font-family:var(--display); font-weight:400; font-size:clamp(26px,4vw,36px);
+    line-height:1.15; margin-bottom:14px;
+  }
+  .wrap > p.intro{color:var(--ink-soft); font-size:15.5px; margin-bottom:36px;}
+
+  .credencial-card{
+    border-radius:20px; overflow:hidden; margin-bottom:28px;
+    box-shadow:0 20px 50px rgba(57,37,12,.14);
+    background:var(--paper);
+  }
+  .credencial-card img{display:block; width:100%; height:auto;}
+  .credencial-card .placeholder{
+    aspect-ratio:2/3; display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:14px; padding:20px; text-align:center;
+  }
+
+  .acciones{display:flex; flex-direction:column; gap:14px;}
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:var(--body); font-size:15.5px; font-weight:600;
+    border-radius:30px; padding:15px 24px; text-decoration:none;
+    border:none; cursor:pointer;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .btn:hover{opacity:.9; transform:translateY(-1px);}
+  .btn-primary{background:var(--mustard); color:var(--paper-soft);}
+  .btn-wallet{
+    background:var(--paper); color:var(--ink-soft); opacity:.6; cursor:not-allowed;
+    border:1px solid var(--line);
+  }
+  .btn-wallet:hover{opacity:.6; transform:none;}
+  .wallet-note{font-size:12.5px; color:var(--ink-soft); margin-top:-4px;}
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <a href="index.html"><img src="images/logo.png" alt="Casa Niño"></a>
+    <a href="index.html" class="back">← Volver</a>
+  </div>
+
+  <div class="wrap">
+    <h1>Tu credencial digital</h1>
+    <p class="intro">Guardala en tu celular para tenerla siempre a mano.</p>
+
+    <div class="credencial-card">
+      <img id="credencial-img" src="" alt="Tu credencial de Casa Niño" style="display:none;">
+      <div id="credencial-placeholder" class="placeholder">Buscando tu credencial…</div>
+    </div>
+
+    <div class="acciones">
+      <a id="btn-descargar" class="btn btn-primary" download="credencial-casa-nino.png">Guardar en tu celular</a>
+      <button class="btn btn-wallet" disabled title="Próximamente">Agregar a Apple / Google Wallet</button>
+      <div class="wallet-note">La opción de Wallet todavía no está disponible — por ahora podés guardar la imagen y usarla igual.</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const img = document.getElementById('credencial-img');
+  const placeholder = document.getElementById('credencial-placeholder');
+  const btnDescargar = document.getElementById('btn-descargar');
+
+  if (!id) {
+    placeholder.textContent = 'No encontramos el identificador de tu credencial. Revisá el link del mail que recibiste.';
+    btnDescargar.style.display = 'none';
+    return;
+  }
+
+  const url = `/.netlify/functions/credencial-imagen?id=${encodeURIComponent(id)}`;
+  img.src = url;
+  img.onload = () => {
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  };
+  img.onerror = () => {
+    placeholder.textContent = 'No pudimos encontrar esta credencial. Si el problema persiste, escribinos.';
+  };
+  btnDescargar.href = url;
+})();
+</script>
+</body>
+</html>

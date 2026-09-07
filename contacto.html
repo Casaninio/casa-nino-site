@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — Casa Niño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FFE573;
+    --paper-soft: #FFECC5;
+    --ink: #39250C;
+    --ink-soft: rgba(57,37,12,0.66);
+    --mustard: #C57913;
+    --line: rgba(57,37,12,0.18);
+    --error: #B4402A;
+    --display: 'Fraunces', serif;
+    --body: 'Work Sans', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper-soft); color:var(--ink); font-family:var(--body); line-height:1.5;}
+  a{color:inherit;}
+
+  .top{
+    padding:22px 6vw; display:flex; align-items:center; justify-content:space-between;
+    background:var(--paper);
+  }
+  .top img{height:40px; width:auto; display:block;}
+  .top a.back{font-size:14px; text-decoration:none; color:var(--ink-soft);}
+  .top a.back:hover{color:var(--ink);}
+
+  .intro-block{max-width:720px; margin:0 auto; padding:72px 24px 12px; text-align:center;}
+  .intro-block .kicker{
+    font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--mustard); font-weight:600; margin-bottom:18px;
+  }
+  .intro-block h1{
+    font-family:var(--display); font-weight:400; font-size:clamp(34px,5.4vw,52px);
+    line-height:1.1; margin-bottom:20px;
+  }
+  .intro-block p{
+    color:var(--ink-soft); font-size:16.5px; line-height:1.7; max-width:600px; margin:0 auto;
+  }
+  .intro-block p a{color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:3px;}
+  .intro-block p a:hover{color:var(--mustard);}
+
+  .contacto-wrap{
+    max-width:1040px; margin:0 auto; padding:48px 24px 110px;
+    display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start;
+  }
+
+  /* ── formulario ── */
+  .contacto-form{
+    background:var(--paper); border-radius:18px;
+    padding:40px; box-shadow:0 20px 50px rgba(57,37,12,.10);
+    display:flex; flex-direction:column;
+  }
+  .field{margin-bottom:20px;}
+  .field label{display:block; font-size:13.5px; font-weight:600; margin-bottom:7px;}
+  .field input, .field textarea{
+    width:100%; font-family:var(--body); font-size:15px; color:var(--ink);
+    background:var(--paper-soft); border:1px solid var(--line);
+    border-radius:8px; padding:13px 14px; outline:none; resize:vertical;
+    transition:border-color .2s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--mustard);}
+  .field textarea{min-height:120px; font-family:var(--body);}
+  .submit-btn{
+    margin-top:8px; width:100%;
+    font-family:var(--body); font-size:16px; font-weight:600;
+    background:var(--mustard); color:var(--paper-soft);
+    border:none; border-radius:30px; padding:16px 24px; cursor:pointer;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .submit-btn:hover{opacity:.9;}
+
+  /* ── info: dirección, whatsapp, mapa ── */
+  .contacto-info .info-item{
+    display:flex; gap:14px; align-items:flex-start; margin-bottom:26px;
+  }
+  .contacto-info .info-item .icon{
+    flex-shrink:0; width:22px; height:22px; color:var(--mustard); margin-top:2px;
+  }
+  .contacto-info .info-item .label{font-size:12.5px; font-weight:600; color:var(--mustard); margin-bottom:4px; text-transform:uppercase; letter-spacing:.03em;}
+  .contacto-info .info-item .value{font-size:15.5px; color:var(--ink); line-height:1.55;}
+  .contacto-info .info-item a.value{text-decoration:none;}
+  .contacto-info .info-item a.value:hover{color:var(--mustard);}
+
+  .mapa-box{
+    margin-top:8px; border-radius:18px; overflow:hidden;
+    background:var(--paper); box-shadow:0 20px 50px rgba(57,37,12,.10);
+  }
+  .mapa-box svg{display:block; width:100%; height:auto;}
+
+  @media (max-width:860px){
+    .contacto-wrap{grid-template-columns:1fr; gap:40px;}
+  }
+  @media (max-width:600px){
+    .top{padding:16px 20px;}
+    .top img{height:32px;}
+    .intro-block{padding:50px 20px 8px;}
+    .contacto-form{padding:28px 24px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <a href="index.html"><img src="images/logo.png" alt="Casa Niño"></a>
+    <a href="index.html" class="back">← Volver</a>
+  </div>
+
+  <div class="intro-block">
+    <div class="kicker">Contacto</div>
+    <h1>Escribinos</h1>
+    <p>Si tenés alguna consulta, querés acercar una propuesta o coordinar con nosotros una actividad, completá el formulario o escribinos un mail a <a href="mailto:casa@ninioeditor.com">casa@ninioeditor.com</a>.</p>
+  </div>
+
+  <div class="contacto-wrap">
+
+    <form class="contacto-form" onsubmit="return false;">
+      <div class="field">
+        <label for="c-nombre">Nombre completo</label>
+        <input id="c-nombre" type="text" required>
+      </div>
+      <div class="field">
+        <label for="c-mail">E-mail</label>
+        <input id="c-mail" type="email" required>
+      </div>
+      <div class="field">
+        <label for="c-comentario">Comentario</label>
+        <textarea id="c-comentario" required></textarea>
+      </div>
+      <button type="submit" class="submit-btn">Enviar</button>
+    </form>
+
+    <div class="contacto-info">
+      <div class="info-item">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+        <div>
+          <div class="label">Dirección</div>
+          <div class="value">Donado 1652, Villa Ortúzar, CABA</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h1.6c.5 0 .96.32 1.12.8l1.2 3.6c.16.47.02 1-.35 1.32L7.6 10a12 12 0 0 0 6.4 6.4l1.28-1.47c.32-.37.85-.5 1.32-.35l3.6 1.2c.48.16.8.62.8 1.12v1.6A2.5 2.5 0 0 1 18.5 21C10 21 3 14 3 5.5z"/></svg>
+        <div>
+          <div class="label">WhatsApp</div>
+          <a class="value" href="https://wa.me/5491156386986" target="_blank" rel="noopener">+54 9 11 5638 6986</a>
+        </div>
+      </div>
+
+      <div class="mapa-box">
+        <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="300" fill="#FFECC5"/>
+
+          <!-- calle Donado (horizontal, la principal) -->
+          <line x1="0" y1="165" x2="400" y2="165" stroke="#39250C" stroke-opacity="0.22" stroke-width="16"/>
+          <text x="200" y="192" text-anchor="middle" font-family="Work Sans, sans-serif" font-weight="600" font-size="12" fill="#39250C" fill-opacity="0.6" letter-spacing="1">DONADO</text>
+
+          <!-- calle Virrey del Pino (vertical, izquierda) -->
+          <line x1="65" y1="0" x2="65" y2="300" stroke="#39250C" stroke-opacity="0.22" stroke-width="12"/>
+          <text font-family="Work Sans, sans-serif" font-weight="600" font-size="10.5" fill="#39250C" fill-opacity="0.6" letter-spacing=".5" transform="translate(40,175) rotate(-90)">VIRREY DEL PINO</text>
+
+          <!-- calle Carbajal (vertical, derecha) -->
+          <line x1="335" y1="0" x2="335" y2="300" stroke="#39250C" stroke-opacity="0.22" stroke-width="12"/>
+          <text font-family="Work Sans, sans-serif" font-weight="600" font-size="10.5" fill="#39250C" fill-opacity="0.6" letter-spacing=".5" transform="translate(360,175) rotate(-90)">CARBAJAL</text>
+
+          <!-- pin apoyado justo sobre la vereda de Donado -->
+          <g transform="translate(178,165)">
+            <circle cx="0" cy="0" r="20" fill="#C57913" fill-opacity="0.16"/>
+            <path d="M0 -42c-9 0-16 7-16 16 0 12 16 26 16 26s16-14 16-26c0-9-7-16-16-16z" fill="#C57913"/>
+            <circle cx="0" cy="-26" r="6" fill="#FFECC5"/>
+          </g>
+          <text x="178" y="88" text-anchor="middle" font-family="Work Sans, sans-serif" font-weight="600" font-size="13" fill="#39250C">Donado 1652</text>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

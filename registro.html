@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sumate a Casa Niño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FFE573;
+    --paper-soft: #FFECC5;
+    --ink: #39250C;
+    --ink-soft: rgba(57,37,12,0.66);
+    --mustard: #C57913;
+    --line: rgba(57,37,12,0.18);
+    --error: #B4402A;
+    --display: 'Fraunces', serif;
+    --body: 'Work Sans', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper-soft);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.5;
+  }
+  a{color:inherit;}
+
+  .top{
+    padding:22px 6vw;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--paper);
+  }
+  .top img{height:40px; width:auto; display:block;}
+  .top a.back{font-size:14px; text-decoration:none; color:var(--ink-soft);}
+  .top a.back:hover{color:var(--ink);}
+
+  .wrap{max-width:680px; margin:0 auto; padding:64px 24px 100px;}
+  .wrap h1{
+    font-family:var(--display); font-weight:400; font-size:clamp(30px,4.4vw,44px);
+    line-height:1.12; margin-bottom:14px;
+  }
+  .wrap > p.intro{
+    color:var(--ink-soft); font-size:16px; max-width:520px; margin-bottom:8px;
+  }
+  .wrap > p.note{
+    color:var(--ink-soft); font-size:13px; margin-bottom:52px;
+  }
+
+  fieldset{
+    border:none; margin-bottom:48px; padding-top:28px;
+    border-top:1px solid var(--line);
+  }
+  fieldset:first-of-type{padding-top:0; border-top:none;}
+  legend{
+    font-family:var(--display); font-weight:400; font-size:22px;
+    margin-bottom:6px; padding:0; width:100%;
+  }
+  .field-help{
+    font-size:13.5px; color:var(--ink-soft); margin-bottom:22px;
+  }
+
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block; font-size:13.5px; font-weight:600; margin-bottom:7px;
+  }
+  .field .opt-label{font-weight:400; color:var(--ink-soft); font-weight:400;}
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field select{
+    width:100%; font-family:var(--body); font-size:15px; color:var(--ink);
+    background:var(--paper); border:1px solid var(--line);
+    border-radius:8px; padding:13px 14px; outline:none;
+    transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus{border-color:var(--mustard);}
+  .field select{appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="9"><path d="M1 1l6 6 6-6" stroke="%2339250C" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;}
+  .field small.hint{display:block; margin-top:6px; font-size:12.5px; color:var(--ink-soft);}
+  .field .error-msg{display:none; font-size:12.5px; color:var(--error); margin-top:6px;}
+  .field.invalid input, .field.invalid select{border-color:var(--error);}
+  .field.invalid .error-msg{display:block;}
+
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:560px){.row-2{grid-template-columns:1fr;}}
+
+  .check-list{display:flex; flex-direction:column; gap:2px;}
+  .check-item{
+    display:flex; align-items:flex-start; gap:12px;
+    padding:12px 4px; border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .check-item:last-child{border-bottom:none;}
+  .check-item input{margin-top:3px; width:17px; height:17px; accent-color:var(--mustard); cursor:pointer; flex-shrink:0;}
+  .check-item span{font-size:15px;}
+  .check-item.disabled{opacity:.4; cursor:not-allowed;}
+  .check-item.disabled input{cursor:not-allowed;}
+  .interest-counter{font-size:12.5px; color:var(--ink-soft); margin-top:12px;}
+  .interest-counter b{color:var(--mustard);}
+
+  .radio-group{display:flex; gap:14px;}
+  .radio-pill{
+    flex:1; text-align:center; padding:14px 12px;
+    border:1px solid var(--line); border-radius:10px;
+    cursor:pointer; font-size:15px; font-weight:600;
+    background:var(--paper); transition:border-color .2s, background .2s;
+  }
+  .radio-pill input{position:absolute; opacity:0; pointer-events:none;}
+  .radio-pill.active{border-color:var(--mustard); background:var(--paper-soft); color:var(--mustard);}
+
+  #educadores-section{
+    overflow:hidden; max-height:0; opacity:0;
+    transition:max-height .45s ease, opacity .35s ease, margin .45s ease;
+  }
+  #educadores-section.open{max-height:900px; opacity:1;}
+
+  .submit-btn{
+    width:100%; font-family:var(--body); font-size:16px; font-weight:600;
+    background:var(--mustard); color:var(--paper-soft);
+    border:none; border-radius:30px; padding:17px 24px; cursor:pointer;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .submit-btn:hover{opacity:.9;}
+  .submit-btn:disabled{opacity:.55; cursor:not-allowed;}
+  .form-status{
+    margin-top:16px; font-size:13.5px; text-align:center; min-height:18px;
+  }
+  .form-status.error{color:var(--error);}
+  .form-status.loading{color:var(--ink-soft);}
+
+  .success-screen{display:none; text-align:center; padding:40px 0;}
+  .success-screen.visible{display:block;}
+  .success-screen .icon{
+    width:56px; height:56px; border-radius:50%; background:var(--mustard);
+    color:var(--paper); display:flex; align-items:center; justify-content:center;
+    font-size:26px; margin:0 auto 22px;
+  }
+  .success-screen h2{
+    font-family:var(--display); font-weight:400; font-size:28px; margin-bottom:14px;
+  }
+  .success-screen p{color:var(--ink-soft); font-size:15px; max-width:440px; margin:0 auto 10px; line-height:1.65;}
+  #form-root.hidden{display:none;}
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <a href="index.html"><img src="images/logo.png" alt="Casa Niño"></a>
+    <a href="index.html" class="back">← Volver</a>
+  </div>
+
+  <div class="wrap">
+    <h1>Sumate a Casa Niño</h1>
+    <p class="intro">Completá tus datos para acceder a todas las propuestas y beneficios de Casa Niño. Te lleva solo 2 minutos y vas a recibir tu credencial digital en forma automática para que la lleves en tu celular.</p>
+    <p class="note">El registro no requiere crear usuario ni contraseña.</p>
+
+    <form id="form-root" novalidate>
+
+      <fieldset>
+        <legend>Datos personales</legend>
+        <div class="field" data-field="nombre">
+          <label for="f-nombre">Nombre y apellido</label>
+          <input type="text" id="f-nombre" name="nombre" required>
+          <div class="error-msg">Ingresá tu nombre y apellido.</div>
+        </div>
+        <div class="field" data-field="email">
+          <label for="f-email">Correo electrónico</label>
+          <input type="email" id="f-email" name="email" required>
+          <div class="error-msg">Ingresá un correo electrónico válido.</div>
+        </div>
+        <div class="row-2">
+          <div class="field" data-field="ciudad">
+            <label for="f-ciudad">Ciudad / localidad</label>
+            <input type="text" id="f-ciudad" name="ciudad" required>
+            <div class="error-msg">Ingresá tu ciudad o localidad.</div>
+          </div>
+          <div class="field" data-field="provincia">
+            <label for="f-provincia">Provincia</label>
+            <select id="f-provincia" name="provincia" required>
+              <option value="" disabled selected>Elegí una opción</option>
+              <option>Buenos Aires</option>
+              <option>CABA</option>
+              <option>Catamarca</option>
+              <option>Chaco</option>
+              <option>Chubut</option>
+              <option>Córdoba</option>
+              <option>Corrientes</option>
+              <option>Entre Ríos</option>
+              <option>Formosa</option>
+              <option>Jujuy</option>
+              <option>La Pampa</option>
+              <option>La Rioja</option>
+              <option>Mendoza</option>
+              <option>Misiones</option>
+              <option>Neuquén</option>
+              <option>Río Negro</option>
+              <option>Salta</option>
+              <option>San Juan</option>
+              <option>San Luis</option>
+              <option>Santa Cruz</option>
+              <option>Santa Fe</option>
+              <option>Santiago del Estero</option>
+              <option>Tierra del Fuego</option>
+              <option>Tucumán</option>
+              <option>Otro país</option>
+            </select>
+            <div class="error-msg">Elegí tu provincia.</div>
+          </div>
+        </div>
+        <div class="field" data-field="whatsapp">
+          <label for="f-whatsapp">WhatsApp <span class="opt-label">(opcional)</span></label>
+          <input type="tel" id="f-whatsapp" name="whatsapp" placeholder="+54 9 11 ...">
+          <small class="hint">Lo usamos solo para comunicaciones esporádicas.</small>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Qué te interesa encontrar en Casa Niño?</legend>
+        <div class="field-help">Podés elegir hasta 3 opciones.</div>
+        <div class="check-list" id="intereses-list">
+          <label class="check-item"><input type="checkbox" name="intereses" value="Libros para mí"><span>Libros para mí</span></label>
+          <label class="check-item"><input type="checkbox" name="intereses" value="Libros para niños y niñas"><span>Libros para niños y niñas</span></label>
+          <label class="check-item"><input type="checkbox" name="intereses" value="Actividades para compartir en familia"><span>Actividades para compartir en familia</span></label>
+          <label class="check-item"><input type="checkbox" name="intereses" value="Talleres y propuestas de arte y oficios"><span>Talleres y propuestas de arte y oficios</span></label>
+          <label class="check-item"><input type="checkbox" name="intereses" value="Propuestas para educadores e instituciones públicas"><span>Propuestas para educadores e instituciones públicas</span></label>
+          <label class="check-item"><input type="checkbox" name="intereses" value="Beneficios y descuentos"><span>Beneficios y descuentos</span></label>
+        </div>
+        <div class="interest-counter"><b id="interes-count">0</b>/3 seleccionadas</div>
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Trabajás en educación?</legend>
+        <div class="radio-group" id="educacion-toggle">
+          <label class="radio-pill" data-value="si"><input type="radio" name="trabaja_educacion" value="si">Sí</label>
+          <label class="radio-pill" data-value="no"><input type="radio" name="trabaja_educacion" value="no">No</label>
+        </div>
+      </fieldset>
+
+      <div id="educadores-section">
+        <fieldset>
+          <legend>Educadores</legend>
+          <div class="field" data-field="rol">
+            <label for="f-rol">¿Cuál es tu rol?</label>
+            <select id="f-rol" name="rol">
+              <option value="" disabled selected>Elegí una opción</option>
+              <option>Docente</option>
+              <option>Bibliotecario/a</option>
+              <option>Mediador/a de lectura</option>
+              <option>Directivo/a</option>
+              <option>Responsable de programas o políticas de lectura</option>
+              <option>Otro</option>
+            </select>
+            <div class="error-msg">Elegí tu rol.</div>
+          </div>
+          <div class="field" data-field="tipo_institucion">
+            <label for="f-tipo-institucion">¿En qué tipo de institución trabajás?</label>
+            <select id="f-tipo-institucion" name="tipo_institucion">
+              <option value="" disabled selected>Elegí una opción</option>
+              <option>Escuela – Ed. inicial</option>
+              <option>Escuela – Ed. primaria</option>
+              <option>Escuela – Ed. Secundaria</option>
+              <option>Educación superior</option>
+              <option>Biblioteca</option>
+              <option>Institución educativa</option>
+              <option>Organismo público</option>
+              <option>Organización cultural</option>
+              <option>Otro</option>
+            </select>
+            <div class="error-msg">Elegí el tipo de institución.</div>
+          </div>
+          <div class="field" data-field="nombre_institucion">
+            <label for="f-nombre-institucion">Nombre de la institución</label>
+            <input type="text" id="f-nombre-institucion" name="nombre_institucion">
+            <div class="error-msg">Ingresá el nombre de la institución.</div>
+          </div>
+          <div class="field" data-field="termino_educador">
+            <label for="f-termino">¿Cómo preferís que te nombremos?</label>
+            <select id="f-termino" name="termino_educador">
+              <option value="" disabled selected>Elegí una opción</option>
+              <option value="Educador">Educador</option>
+              <option value="Educadora">Educadora</option>
+            </select>
+            <small class="hint">Así va a aparecer en tu credencial y en el mail de bienvenida.</small>
+            <div class="error-msg">Elegí una opción.</div>
+          </div>
+        </fieldset>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn">Sumarme a Casa Niño</button>
+      <div class="form-status" id="form-status"></div>
+    </form>
+
+    <div class="success-screen" id="success-screen">
+      <div class="icon">✓</div>
+      <h2>¡Ya formás parte de Casa Niño!</h2>
+      <p>Te enviamos un mail de confirmación a tu casilla. Ahí vas a encontrar tu credencial digital, que podés guardar como imagen o agregar a Apple Wallet / Google Wallet.</p>
+      <p>Ya podés acceder a los beneficios que correspondan a tu perfil.</p>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const FUNCTION_URL = '/.netlify/functions/registro'; // ajustar si se despliega en otro dominio
+
+  const form = document.getElementById('form-root');
+  const successScreen = document.getElementById('success-screen');
+  const statusEl = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // ── Intereses: máximo 3 ──
+  const interestBoxes = Array.from(document.querySelectorAll('input[name="intereses"]'));
+  const interesCountEl = document.getElementById('interes-count');
+  function updateInterestState(){
+    const checked = interestBoxes.filter(b => b.checked);
+    interesCountEl.textContent = checked.length;
+    interestBoxes.forEach(b => {
+      const item = b.closest('.check-item');
+      if(!b.checked && checked.length >= 3){
+        b.disabled = true; item.classList.add('disabled');
+      } else {
+        b.disabled = false; item.classList.remove('disabled');
+      }
+    });
+  }
+  interestBoxes.forEach(b => b.addEventListener('change', updateInterestState));
+
+  // ── Toggle sección educadores ──
+  const eduRadios = document.querySelectorAll('input[name="trabaja_educacion"]');
+  const eduSection = document.getElementById('educadores-section');
+  const eduPills = document.querySelectorAll('#educacion-toggle .radio-pill');
+  const eduRequiredFields = ['f-rol', 'f-tipo-institucion', 'f-nombre-institucion', 'f-termino'];
+
+  eduRadios.forEach(r => r.addEventListener('change', () => {
+    eduPills.forEach(p => p.classList.toggle('active', p.dataset.value === r.value && r.checked));
+    const isEducador = document.querySelector('input[name="trabaja_educacion"]:checked')?.value === 'si';
+    eduSection.classList.toggle('open', isEducador);
+    eduRequiredFields.forEach(id => {
+      document.getElementById(id).required = isEducador;
+    });
+    if(!isEducador){
+      eduRequiredFields.forEach(id => clearFieldError(id));
+    }
+  }));
+
+  // ── Validación ──
+  function setFieldError(fieldName, hasError){
+    const field = document.querySelector(`[data-field="${fieldName}"]`);
+    if(field) field.classList.toggle('invalid', hasError);
+  }
+  function clearFieldError(inputId){
+    const input = document.getElementById(inputId);
+    const field = input?.closest('.field');
+    if(field) field.classList.remove('invalid');
+  }
+
+  function validate(){
+    let valid = true;
+    const required = form.querySelectorAll('[required]');
+    required.forEach(el => {
+      const fieldName = el.closest('.field')?.dataset.field;
+      let fieldValid = true;
+      if(el.type === 'email'){
+        fieldValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      } else {
+        fieldValid = el.value.trim().length > 0;
+      }
+      if(fieldName) setFieldError(fieldName, !fieldValid);
+      if(!fieldValid) valid = false;
+    });
+    return valid;
+  }
+
+  // ── Submit ──
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusEl.textContent = '';
+    statusEl.className = 'form-status';
+
+    if(!validate()){
+      statusEl.textContent = 'Revisá los campos marcados antes de continuar.';
+      statusEl.className = 'form-status error';
+      return;
+    }
+
+    const intereses = interestBoxes.filter(b => b.checked).map(b => b.value);
+    const trabajaEducacion = document.querySelector('input[name="trabaja_educacion"]:checked')?.value === 'si';
+
+    const payload = {
+      nombre: document.getElementById('f-nombre').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      ciudad: document.getElementById('f-ciudad').value.trim(),
+      provincia: document.getElementById('f-provincia').value,
+      whatsapp: document.getElementById('f-whatsapp').value.trim(),
+      intereses,
+      trabaja_educacion: trabajaEducacion,
+      rol: trabajaEducacion ? document.getElementById('f-rol').value : null,
+      tipo_institucion: trabajaEducacion ? document.getElementById('f-tipo-institucion').value : null,
+      nombre_institucion: trabajaEducacion ? document.getElementById('f-nombre-institucion').value.trim() : null,
+      termino_educador: trabajaEducacion ? document.getElementById('f-termino').value : null
+    };
+
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Enviando...';
+    statusEl.className = 'form-status loading';
+
+    try{
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error('request_failed');
+
+      form.classList.add('hidden');
+      successScreen.classList.add('visible');
+    } catch(err){
+      statusEl.textContent = 'No pudimos completar el registro. Probá de nuevo en un momento.';
+      statusEl.className = 'form-status error';
+      submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

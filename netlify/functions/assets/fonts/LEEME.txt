@@ -1,0 +1,10 @@
+Colocá acá estos 3 archivos antes de deployar (ver README.md del proyecto,
+sección "Generación automática de la credencial"):
+
+- Fraunces-Bold.ttf
+- WorkSans-Regular.ttf
+- WorkSans-Bold.ttf
+
+Se descargan gratis desde Google Fonts:
+https://fonts.google.com/specimen/Fraunces
+https://fonts.google.com/specimen/Work+Sans
