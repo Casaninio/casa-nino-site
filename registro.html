@@ -41,12 +41,13 @@
     font-family:var(--display); font-weight:400; font-size:clamp(30px,4.4vw,44px);
     line-height:1.12; margin-bottom:14px;
   }
-  .wrap > p.intro{
+  .wrap > #intro-block p.intro{
     color:var(--ink-soft); font-size:16px; max-width:520px; margin-bottom:8px;
   }
-  .wrap > p.note{
+  .wrap > #intro-block p.note{
     color:var(--ink-soft); font-size:13px; margin-bottom:52px;
   }
+  #intro-block.hidden{display:none;}
 
   fieldset{
     border:none; margin-bottom:48px; padding-top:28px;
@@ -151,9 +152,12 @@
   </div>
 
   <div class="wrap">
-    <h1>Sumate a Casa Niño</h1>
-    <p class="intro">Completá tus datos para acceder a todas las propuestas y beneficios de Casa Niño. Te lleva solo 2 minutos y vas a recibir tu credencial digital en forma automática para que la lleves en tu celular.</p>
-    <p class="note">El registro no requiere crear usuario ni contraseña.</p>
+
+    <div id="intro-block">
+      <h1>Sumate a Casa Niño</h1>
+      <p class="intro">Completá tus datos para acceder a todas las propuestas y beneficios de Casa Niño. Te lleva solo 2 minutos y vas a recibir tu credencial digital en forma automática para que la lleves en tu celular.</p>
+      <p class="note">El registro no requiere crear usuario ni contraseña.</p>
+    </div>
 
     <form id="form-root" novalidate>
 
@@ -294,8 +298,8 @@
     <div class="success-screen" id="success-screen">
       <div class="icon">✓</div>
       <h2>¡Ya formás parte de Casa Niño!</h2>
-      <p>Te enviamos un mail de confirmación a tu casilla. Ahí vas a encontrar tu credencial digital, que podés guardar como imagen o agregar a Apple Wallet / Google Wallet.</p>
-      <p>Ya podés acceder a los beneficios que correspondan a tu perfil.</p>
+      <p>Te enviamos un mail de confirmación a tu casilla. Ahí vas a encontrar tu credencial digital para guardar como imagen.</p>
+      <p>Ya podés acceder a todos nuestros beneficios.</p>
     </div>
   </div>
 
@@ -303,6 +307,7 @@
 (function(){
   const FUNCTION_URL = '/.netlify/functions/registro'; // ajustar si se despliega en otro dominio
 
+  const introBlock = document.getElementById('intro-block');
   const form = document.getElementById('form-root');
   const successScreen = document.getElementById('success-screen');
   const statusEl = document.getElementById('form-status');
@@ -412,6 +417,7 @@
       });
       if(!res.ok) throw new Error('request_failed');
 
+      introBlock.classList.add('hidden');
       form.classList.add('hidden');
       successScreen.classList.add('visible');
     } catch(err){
