@@ -85,12 +85,26 @@ function buildAttributes(data, credentialNumber, credencialImagenUrl, credencial
   if (data.intereses && data.intereses.length) attrs[ATTR.intereses] = data.intereses;
   if (credencialImagenUrl) attrs[ATTR.credencialImagenUrl] = credencialImagenUrl;
   if (credencialPaginaUrl) attrs[ATTR.credencialPaginaUrl] = credencialPaginaUrl;
+
+  // IMPORTANTE: si la persona indica que NO trabaja en educación, hay que
+  // BORRAR explícitamente estos campos (mandando string vacío) en vez de
+  // simplemente omitirlos. Si solo se omiten, Brevo conserva el valor viejo
+  // de un registro anterior (por ejemplo, si la misma persona se había
+  // registrado antes como educador y ahora corrige el dato) — eso causaba
+  // que el mail de bienvenida siguiera mostrando el bloque de "Educador/a"
+  // aunque la persona ya no lo fuera.
   if (data.trabaja_educacion) {
-    if (data.rol) attrs[ATTR.rol] = data.rol;
-    if (data.tipo_institucion) attrs[ATTR.tipoInstitucion] = data.tipo_institucion;
-    if (data.nombre_institucion) attrs[ATTR.nombreInstitucion] = data.nombre_institucion;
-    if (data.termino_educador) attrs[ATTR.terminoEducador] = data.termino_educador;
+    attrs[ATTR.rol] = data.rol || '';
+    attrs[ATTR.tipoInstitucion] = data.tipo_institucion || '';
+    attrs[ATTR.nombreInstitucion] = data.nombre_institucion || '';
+    attrs[ATTR.terminoEducador] = data.termino_educador || '';
+  } else {
+    attrs[ATTR.rol] = '';
+    attrs[ATTR.tipoInstitucion] = '';
+    attrs[ATTR.nombreInstitucion] = '';
+    attrs[ATTR.terminoEducador] = '';
   }
+
   return attrs;
 }
 
