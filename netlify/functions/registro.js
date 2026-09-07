@@ -13,12 +13,28 @@ const { getStore } = require('@netlify/blobs');
 const { generarCredencialPNG } = require('./lib/generar-credencial');
 
 // ─────────────────────────────────────────────────────────────
+// Netlify Blobs a veces falla con "MissingBlobsEnvironmentError" incluso
+// con todo bien configurado (bug conocido de la plataforma). Para evitarlo,
+// le pasamos siteID y token de forma explícita en vez de depender de la
+// detección automática. Necesita 2 variables de entorno adicionales:
+// NETLIFY_BLOBS_SITE_ID y NETLIFY_BLOBS_TOKEN (ver README).
+// ─────────────────────────────────────────────────────────────
+function getBlobStore(name) {
+  const siteID = process.env.NETLIFY_BLOBS_SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN;
+  if (siteID && token) {
+    return getStore({ name, siteID, token });
+  }
+  return getStore(name); // fallback a la detección automática
+}
+
+// ─────────────────────────────────────────────────────────────
 // Número de credencial — contador persistente usando Netlify Blobs
 // (incluido en el plan free de Netlify, no requiere ningún servicio externo).
 // Formato final: CN-000123
 // ─────────────────────────────────────────────────────────────
 async function getNextCredentialNumber() {
-  const store = getStore('casa-nino-credenciales');
+  const store = getBlobStore('casa-nino-credenciales');
   const current = await store.get('contador', { type: 'text' });
   const next = (current ? parseInt(current, 10) : 0) + 1;
   await store.set('contador', String(next));
@@ -132,7 +148,7 @@ exports.handler = async function (event) {
       numeroCredencial: credentialNumber,
       terminoEducador: data.trabaja_educacion ? data.termino_educador : null,
     });
-    const imagenesStore = getStore('casa-nino-credenciales-imagenes');
+    const imagenesStore = getBlobStore('casa-nino-credenciales-imagenes');
     await imagenesStore.set(credentialNumber, png);
     if (siteUrl) {
       credencialImagenUrl = `${siteUrl}/.netlify/functions/credencial-imagen?id=${credentialNumber}`;
