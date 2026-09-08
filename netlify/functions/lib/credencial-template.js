@@ -46,13 +46,13 @@ function buildCredencialSVG({ nombre, numeroCredencial, terminoEducador }) {
   <rect width="1024" height="1536" fill="#FFE573"/>
 
   <!-- logo -->
-  <image href="${LOGO_URI}" xlink:href="${LOGO_URI}" x="362" y="55" width="300" height="128" preserveAspectRatio="xMidYMid meet"/>
+  <image href="${LOGO_URI}" xlink:href="${LOGO_URI}" x="362" y="55" width="300" height="186" preserveAspectRatio="xMidYMid meet"/>
 
   <!-- áreas -->
   <text x="512" y="360" text-anchor="middle" font-family="Work Sans" font-weight="700" font-size="21" letter-spacing="2" fill="#C57913">EDITORIAL&#160;&#160;&#160;|&#160;&#160;&#160;LIBRERÍA&#160;&#160;&#160;|&#160;&#160;&#160;PROYECTOS&#160;&#160;&#160;|&#160;&#160;&#160;EDUCACIÓN</text>
 
-  <!-- ilustración decorativa (detrás del texto inferior) -->
-  <image href="${ILUSTRACION_URI}" xlink:href="${ILUSTRACION_URI}" x="0" y="800" width="1024" height="429" preserveAspectRatio="xMaxYMid slice"/>
+  <!-- ilustración decorativa (marca de agua, detrás del texto inferior) -->
+  <image href="${ILUSTRACION_URI}" xlink:href="${ILUSTRACION_URI}" x="47" y="769" width="977" height="480" opacity="0.17" preserveAspectRatio="xMidYMid meet"/>
 
   <!-- nombre -->
   <text x="85" y="632" font-family="Fraunces" font-weight="700" font-size="64" fill="#39250C">${nombreSafe}</text>
