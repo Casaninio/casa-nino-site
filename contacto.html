@@ -74,6 +74,27 @@
     transition:opacity .2s ease, transform .2s ease;
   }
   .submit-btn:hover{opacity:.9;}
+  .submit-btn:disabled{opacity:.55; cursor:not-allowed;}
+
+  .form-status{
+    margin-top:14px; font-size:13.5px; text-align:center; min-height:18px;
+  }
+  .form-status.error{color:var(--error);}
+  .form-status.loading{color:var(--ink-soft);}
+
+  .contacto-form.hidden{display:none;}
+
+  .success-block{display:none; text-align:center; padding:20px 4px;}
+  .success-block.visible{display:block;}
+  .success-block .icon{
+    width:52px; height:52px; border-radius:50%; background:var(--mustard);
+    color:var(--paper); display:flex; align-items:center; justify-content:center;
+    font-size:24px; margin:0 auto 20px;
+  }
+  .success-block h2{
+    font-family:var(--display); font-weight:400; font-size:26px; margin-bottom:12px;
+  }
+  .success-block p{color:var(--ink-soft); font-size:15px; line-height:1.6;}
 
   /* ── info: dirección, whatsapp, mapa ── */
   .contacto-info .info-item{
@@ -119,21 +140,30 @@
 
   <div class="contacto-wrap">
 
-    <form class="contacto-form" onsubmit="return false;">
-      <div class="field">
-        <label for="c-nombre">Nombre completo</label>
-        <input id="c-nombre" type="text" required>
+    <div>
+      <form class="contacto-form" id="contacto-form">
+        <div class="field">
+          <label for="c-nombre">Nombre completo</label>
+          <input id="c-nombre" type="text" required>
+        </div>
+        <div class="field">
+          <label for="c-mail">E-mail</label>
+          <input id="c-mail" type="email" required>
+        </div>
+        <div class="field">
+          <label for="c-comentario">Comentario</label>
+          <textarea id="c-comentario" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Enviar</button>
+        <div class="form-status" id="form-status"></div>
+      </form>
+
+      <div class="success-block" id="success-block">
+        <div class="icon">✓</div>
+        <h2>¡Gracias por escribirnos!</h2>
+        <p>Recibimos tu mensaje y te vamos a responder a la brevedad.</p>
       </div>
-      <div class="field">
-        <label for="c-mail">E-mail</label>
-        <input id="c-mail" type="email" required>
-      </div>
-      <div class="field">
-        <label for="c-comentario">Comentario</label>
-        <textarea id="c-comentario" required></textarea>
-      </div>
-      <button type="submit" class="submit-btn">Enviar</button>
-    </form>
+    </div>
 
     <div class="contacto-info">
       <div class="info-item">
@@ -180,5 +210,51 @@
 
   </div>
 
+<script>
+(function(){
+  const FUNCTION_URL = '/.netlify/functions/contacto';
+
+  const form = document.getElementById('contacto-form');
+  const successBlock = document.getElementById('success-block');
+  const statusEl = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusEl.textContent = '';
+    statusEl.className = 'form-status';
+
+    const nombre = document.getElementById('c-nombre').value.trim();
+    const email = document.getElementById('c-mail').value.trim();
+    const mensaje = document.getElementById('c-comentario').value.trim();
+
+    if (!nombre || !email || !mensaje) {
+      statusEl.textContent = 'Completá todos los campos antes de continuar.';
+      statusEl.className = 'form-status error';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Enviando...';
+    statusEl.className = 'form-status loading';
+
+    try {
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, mensaje }),
+      });
+      if (!res.ok) throw new Error('request_failed');
+
+      form.classList.add('hidden');
+      successBlock.classList.add('visible');
+    } catch (err) {
+      statusEl.textContent = 'No pudimos enviar tu mensaje. Probá de nuevo en un momento.';
+      statusEl.className = 'form-status error';
+      submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
 </body>
 </html>
