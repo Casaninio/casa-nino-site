@@ -71,8 +71,28 @@ const ATTR = {
 };
 
 // ─────────────────────────────────────────────────────────────
+// Limpieza del número de WhatsApp.
+//
+// Brevo rechaza el contacto ENTERO (no solo el campo) si el valor de este
+// atributo no cumple con el formato que espera: solo dígitos, con código de
+// país, sin espacios/guiones/paréntesis/"+". Como la gente escribe su
+// teléfono de formas muy variadas en un formulario libre (con espacios,
+// guiones, el "+", el "0" inicial de larga distancia, etc.), sacamos todo
+// caracter que no sea un dígito antes de mandarlo.
+//
+// Si después de limpiar el resultado no tiene una longitud razonable para un
+// número con código de país (entre 8 y 15 dígitos), lo tratamos como
+// inválido y NO lo mandamos — es mejor perder ese dato puntual que perder el
+// registro completo de la persona.
+// ─────────────────────────────────────────────────────────────
+function limpiarWhatsapp(raw) {
+  if (!raw) return null;
+  const soloDigitos = String(raw).replace(/\D/g, '');
+  if (soloDigitos.length < 8 || soloDigitos.length > 15) return null;
+  return soloDigitos;
+}
 
-function buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName) {
+function buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName, incluirWhatsapp = true) {
   const attrs = {
     NOMBRE: firstName,
     APELLIDOS: lastName,
@@ -81,7 +101,12 @@ function buildAttributes(data, credentialNumber, credencialImagenUrl, credencial
     [ATTR.trabajaEducacion]: data.trabaja_educacion ? 'Sí' : 'No',
     [ATTR.numeroCredencial]: credentialNumber,
   };
-  if (data.whatsapp) attrs[ATTR.whatsapp] = data.whatsapp;
+
+  if (incluirWhatsapp) {
+    const whatsappLimpio = limpiarWhatsapp(data.whatsapp);
+    if (whatsappLimpio) attrs[ATTR.whatsapp] = whatsappLimpio;
+  }
+
   if (data.intereses && data.intereses.length) attrs[ATTR.intereses] = data.intereses;
   if (credencialImagenUrl) attrs[ATTR.credencialImagenUrl] = credencialImagenUrl;
   if (credencialPaginaUrl) attrs[ATTR.credencialPaginaUrl] = credencialPaginaUrl;
@@ -172,19 +197,43 @@ exports.handler = async function (event) {
     console.error('Error generando la imagen de la credencial:', err.message);
   }
 
-  const contactPayload = {
-    email: data.email,
-    attributes: buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName),
-    listIds: [Number(listId)],
-    updateEnabled: true, // si el mail ya existe, actualiza en vez de fallar
-  };
-
-  try {
-    const response = await axios.post(
+  async function crearContactoEnBrevo(incluirWhatsapp) {
+    const contactPayload = {
+      email: data.email,
+      attributes: buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName, incluirWhatsapp),
+      listIds: [Number(listId)],
+      updateEnabled: true, // si el mail ya existe, actualiza en vez de fallar
+    };
+    return axios.post(
       'https://api.brevo.com/v3/contacts',
       contactPayload,
       { headers: { 'api-key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' } }
     );
+  }
+
+  try {
+    let response;
+    try {
+      response = await crearContactoEnBrevo(true);
+    } catch (err) {
+      const brevoError = err.response?.data;
+      // Si Brevo rechazó específicamente el número de WhatsApp, reintentamos
+      // UNA vez sin ese campo — así la persona queda registrada igual, en
+      // vez de perder todo el registro por un dato secundario. El resto de
+      // los errores (email inválido, lista inexistente, etc.) sí cortan
+      // el registro como antes.
+      const esErrorDeWhatsapp =
+        brevoError?.code === 'invalid_parameter' &&
+        typeof brevoError?.message === 'string' &&
+        brevoError.message.toLowerCase().includes('whatsapp');
+
+      if (esErrorDeWhatsapp) {
+        console.warn('WhatsApp inválido, reintentando el registro sin ese campo:', data.whatsapp);
+        response = await crearContactoEnBrevo(false);
+      } else {
+        throw err;
+      }
+    }
 
     return {
       statusCode: 200,
