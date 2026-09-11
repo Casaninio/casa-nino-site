@@ -54,11 +54,26 @@ const LIST_ID_EDUCADORES = process.env.BREVO_LIST_ID_EDUCADORES; // ej: 4
 // Contactos → Configuración → Atributos de contacto. Los nombres van en
 // MAYÚSCULAS por convención de Brevo. Si el nombre de tu atributo en Brevo es
 // distinto al de acá, solo hay que cambiar el string de la derecha.
+//
+// IMPORTANTE sobre "telefono": este es un atributo de texto libre CREADO POR
+// NOSOTROS (Contactos → Configuración → Atributos → tipo "Texto"), NO el
+// campo nativo "WHATSAPP" de Brevo. El campo nativo WHATSAPP habilita el
+// canal de envío de WhatsApp marketing y por eso Brevo le exige un formato
+// de teléfono válido y estricto (con código de país, etc.), rechazando el
+// contacto ENTERO si no lo cumple — eso fue justamente lo que causó que se
+// perdieran registros el 11/9. Usando un atributo de texto propio en su
+// lugar, Brevo no valida el formato en absoluto: acepta cualquier cosa que
+// la persona haya escrito, sin excepciones ni rechazos.
+//
+// Contrapartida a tener en cuenta: como no se usa el campo nativo, estos
+// contactos NO quedan habilitados automáticamente para el canal de WhatsApp
+// marketing de Brevo. Si en el futuro se quiere usar ese canal, hay que
+// migrar/validar los números por separado en ese momento.
 // ─────────────────────────────────────────────────────────────
 const ATTR = {
   ciudad: 'CIUDAD',
   provincia: 'PROVINCIA',
-  whatsapp: 'WHATSAPP',
+  telefono: 'TELEFONO',
   trabajaEducacion: 'TRABAJA_EDUCACION',
   rol: 'ROL',
   tipoInstitucion: 'TIPO_INSTITUCION',
@@ -70,29 +85,7 @@ const ATTR = {
   credencialPaginaUrl: 'CREDENCIAL_PAGINA_URL',
 };
 
-// ─────────────────────────────────────────────────────────────
-// Limpieza del número de WhatsApp.
-//
-// Brevo rechaza el contacto ENTERO (no solo el campo) si el valor de este
-// atributo no cumple con el formato que espera: solo dígitos, con código de
-// país, sin espacios/guiones/paréntesis/"+". Como la gente escribe su
-// teléfono de formas muy variadas en un formulario libre (con espacios,
-// guiones, el "+", el "0" inicial de larga distancia, etc.), sacamos todo
-// caracter que no sea un dígito antes de mandarlo.
-//
-// Si después de limpiar el resultado no tiene una longitud razonable para un
-// número con código de país (entre 8 y 15 dígitos), lo tratamos como
-// inválido y NO lo mandamos — es mejor perder ese dato puntual que perder el
-// registro completo de la persona.
-// ─────────────────────────────────────────────────────────────
-function limpiarWhatsapp(raw) {
-  if (!raw) return null;
-  const soloDigitos = String(raw).replace(/\D/g, '');
-  if (soloDigitos.length < 8 || soloDigitos.length > 15) return null;
-  return soloDigitos;
-}
-
-function buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName, incluirWhatsapp = true) {
+function buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName) {
   const attrs = {
     NOMBRE: firstName,
     APELLIDOS: lastName,
@@ -102,9 +95,11 @@ function buildAttributes(data, credentialNumber, credencialImagenUrl, credencial
     [ATTR.numeroCredencial]: credentialNumber,
   };
 
-  if (incluirWhatsapp) {
-    const whatsappLimpio = limpiarWhatsapp(data.whatsapp);
-    if (whatsappLimpio) attrs[ATTR.whatsapp] = whatsappLimpio;
+  // Se guarda tal cual lo escribió la persona (recortando espacios de más al
+  // principio/final), sin ninguna validación de formato — ver nota en ATTR
+  // sobre por qué este campo es de texto libre y no el WHATSAPP nativo.
+  if (data.whatsapp && String(data.whatsapp).trim()) {
+    attrs[ATTR.telefono] = String(data.whatsapp).trim();
   }
 
   if (data.intereses && data.intereses.length) attrs[ATTR.intereses] = data.intereses;
@@ -197,43 +192,19 @@ exports.handler = async function (event) {
     console.error('Error generando la imagen de la credencial:', err.message);
   }
 
-  async function crearContactoEnBrevo(incluirWhatsapp) {
-    const contactPayload = {
-      email: data.email,
-      attributes: buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName, incluirWhatsapp),
-      listIds: [Number(listId)],
-      updateEnabled: true, // si el mail ya existe, actualiza en vez de fallar
-    };
-    return axios.post(
+  const contactPayload = {
+    email: data.email,
+    attributes: buildAttributes(data, credentialNumber, credencialImagenUrl, credencialPaginaUrl, firstName, lastName),
+    listIds: [Number(listId)],
+    updateEnabled: true, // si el mail ya existe, actualiza en vez de fallar
+  };
+
+  try {
+    const response = await axios.post(
       'https://api.brevo.com/v3/contacts',
       contactPayload,
       { headers: { 'api-key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' } }
     );
-  }
-
-  try {
-    let response;
-    try {
-      response = await crearContactoEnBrevo(true);
-    } catch (err) {
-      const brevoError = err.response?.data;
-      // Si Brevo rechazó específicamente el número de WhatsApp, reintentamos
-      // UNA vez sin ese campo — así la persona queda registrada igual, en
-      // vez de perder todo el registro por un dato secundario. El resto de
-      // los errores (email inválido, lista inexistente, etc.) sí cortan
-      // el registro como antes.
-      const esErrorDeWhatsapp =
-        brevoError?.code === 'invalid_parameter' &&
-        typeof brevoError?.message === 'string' &&
-        brevoError.message.toLowerCase().includes('whatsapp');
-
-      if (esErrorDeWhatsapp) {
-        console.warn('WhatsApp inválido, reintentando el registro sin ese campo:', data.whatsapp);
-        response = await crearContactoEnBrevo(false);
-      } else {
-        throw err;
-      }
-    }
 
     return {
       statusCode: 200,
